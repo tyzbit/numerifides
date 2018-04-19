@@ -172,6 +172,7 @@ Further, since a numerifide with a Proof of Proof of Work hash with more than on
 
 Miners are also incentivized to try to split the chain, and stealth mine popular names they anticipate, but are required to lock Bitcoin to be unspendable for the duration of time they have the address, so they must choose very carefully which names they wish to attack.
 
+(TODO: further economic analysis/discussion)
 
 # REFERENCES
 https://en.wikipedia.org/wiki/Zooko%27s_triangle
@@ -179,10 +180,3 @@ https://en.wikipedia.org/wiki/Zooko%27s_triangle
 https://www.ietf.org/rfc/rfc2119.txt
 
 https://en.bitcoin.it/wiki/Script#Transaction_puzzle
-
-For those of you who have read this far: thank you.
-
-I invite public comment on criticism on any flaws the community can identify in a system like this.
-
-Best regards,
-Tyler Hawkins (tyzbit)
