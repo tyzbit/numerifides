@@ -112,7 +112,7 @@ OP_IF
 	[bindata1] [bindata2] OP_2DUP # duplicate the first two inputs
 	OP_EQUAL # push an equals onto the stack
 	OP_NOT OP_VERIFY #ensure the two pieces of data are not equal
-	[hashdata1] OP_SHA1 # hash the first data (SHA-256? Other available hashing function, if SHA1 collisions still are out of the reach of normal users?)
+	[hashdata1] OP_SHA1 # hash the first data
 	OP_SWAP # swap top 2 items on stack
 	[hashdata2] OP_SHA1 # hash the second data
 OP_EQUAL #Ensure the two hashes match (Proof of Work)
@@ -124,15 +124,22 @@ OP_ELSE # allow the funds to be re-spent after CSV expires
 
 (Numerifides transactions such as this MUST also enable Replace-by-fee (RBF) on the funding transaction for reasons outlined below.)
 
-Numerifides transactions can also substitute the specific CheckSigVerify for a CheckMultiSigVerify OPCODE with no additional considerations.)
+Numerifides transactions can also substitute the specific CheckSigVerify for
+either:
+
+* CheckMultiSigVerify or
+
+* P2WSH (BIP-0016)
+
+With no additional considerations.)
 
 Where [user data] refers to data in any of these formats:
 
-Format | Script OPCODE | Notes
--------|---------------|------
-[name]:[data-type][data] | OP_PUSHDATA1 | (Must be less than 255 total bytes to be a valid transaction according to my understanding of the rules today)
-[name]:[data-type][data] | OP_PUSHDATA2 | (Must be less than 511 total bytes to be a valid transaction according to my understanding of the rules today)
-[name]:[data-type][data] | OP_PUSHDATA4 | (Must be less than 1023 total bytes to be a valid transaction according to my understanding of the rules today)
+Format                   | Script OPCODE | Notes
+-------------------------|---------------|------
+[name]:[data-type][data] | OP_PUSHDATA1  | (Must be less than 255 total bytes to be a valid transaction according to my understanding of the rules today)
+[name]:[data-type][data] | OP_PUSHDATA2  | (Must be less than 511 total bytes to be a valid transaction according to my understanding of the rules today)
+[name]:[data-type][data] | OP_PUSHDATA4  | (Must be less than 1023 total bytes to be a valid transaction according to my understanding of the rules today)
 
 Further, the hash in the proof of work included in the transaction must also
 match at least 1 digit of the resulting TXID, which prevents “premine” attacks
@@ -199,29 +206,17 @@ For example, a Numerifides transaction with more matching digits between the TXI
 
 # PROPOSED DATA ENCODING TABLE:
 
-Constant length 2+-byte data field
-Proposed Data Standard
-Constant length separator (2 byte) (proposed 0XFF in Hex, but not certain the best arrangement here)
-Description
+( Separator is proposed to be 0xFF but others could be used )
 
-00
-Private Usage
-The data associated with the name has no explicitly stated purpose. The data SHOULD NOT be used to verify any other consensus-approved data standard.
-
-01
-Bitcoin Address
-The data associated with the name SHOULD BE used to TRUST that the Bitcoin address is controlled by the name it is associated to.
-
-02
-Lightning Node Public Key
-The data associated with the name SHOULD BE used to TRUST an advertised ALIAS of a Lightning node.
-
-03
-GPG Public Key
-The data associated with the name SHOULD BE used to TRUST a GPG Public Key
-
-04-FF
-Future use decided upon via consensus.
+Constant length 2+-byte data field | Proposed Data Standard          | Separator | Description
+-----------------------------------|---------------------------------|-----------|-------------
+00                                 | Private Usage                   | 0xFF      | The data associated with the name has no explicitly stated purpose. The data SHOULD NOT be used to verify any other consensus-approved data standard.
+01                                 | Bitcoin Address                 | 0xFF      | The data associated with the name SHOULD BE used to TRUST that the Bitcoin address is controlled by the name it is associated to.
+02                                 | Lightning Node Public Key       | 0xFF   | The data associated with the name SHOULD BE used to TRUST an advertised ALIAS of a Lightning node.
+03                                 | GPG Public Key                  | 0xFF      | The data associated with the name SHOULD BE used to TRUST a GPG Public Key
+04                                 | Domain-validated Certificate     | 0xFF      | The data SHOULD BE a domain certificate for the specific name in in DOMAIN.TLD format.
+05                                 | DNS mapping                      | 0xFF      | The data SHOULD BE a valid IP address.
+06-FF                              | Future use decided upon via consensus. | 0xFF | Future use
 
 # Implementations
 Implementations of the Numerifides Trust Consensus Protocol will fall into two categories:
@@ -245,6 +240,10 @@ a normal filter request against multiple fully validating nodes, receive the
 full block that matches the query, and verify it.  To look this data up again,
 a SPV node can issue a new query to many nodes and simply ensure it matches the
 previous block the node downloaded.
+
+Plugins can be written to interface the client into any legacy lookup standard such as
+creating a virtual Certificate Authority for the system that vouches for certificates
+looked up via Numerifides.
 
 # Economic rationale:
 
@@ -285,7 +284,7 @@ contested, the user can replace their transaction's fee with a higher one to
 essentially enter into a bidding war for the name they want.
 
 Further, since a numerifide with a Proof of Proof of Work hash with more than
-one matching character to it’s transaction ID (something that can be precomputed
+one matching character to its transaction ID (something that can be precomputed
 noninteractively), essentially any given reservation of a name comes with it the
 creating of a “virtual blockchain” with the genesis block being the first reservation
 of a given name and the difficulty is the Proof of Proof of Work represented by
@@ -301,9 +300,11 @@ names they wish to attack.
 # Example Numerifides registration
 
 User wishes to register the name:data mapping of "Numerifides:[GPG key]".
-User creates the appropriate transaction for a duration of 52,160 blocks (1 year) that:
+User creates the appropriate transaction that:
 
 * Pays back to themselves .001 BTC
+
+* Locks the Bitcoin for a duration of 52,160 blocks (1 year)
 
 * Has an appropriate Proof of Work attached in the form of the transaction puzzle
 
@@ -330,6 +331,15 @@ Numerifides transactions also bloat the blockchain, perhaps unnecessarily as one
 could commit just a script hash, and reveal the script when it is confirmed on the
 blockchain.  This, also proposed by ZmnSCPxj, would mean all transactions could be one
 size, but the incentive for the secondary network to gossip about mappings is questionable.
+
+One way to reduce bloat is to have multiple mappings per transaction, so for example,
+a user wishing to register their GPG key and Lightning node pubkey to the same mapping
+can use a single transaction to do so.
+
+SHA1 collisions are still known to be sufficiently rare and difficult for end users to
+find that it might not be possible to use for the transaction puzzle.  Likewise,
+RIPEMD_160 appears to resist collisions as well, perhaps better than SHA1.
+See https://link.springer.com/chapter/10.1007/11836810_8
 
 # REFERENCES
 https://en.wikipedia.org/wiki/Zooko%27s_triangle
