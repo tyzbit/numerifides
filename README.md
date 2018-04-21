@@ -1,4 +1,4 @@
-# A Proposal for a Novel Proof of Authority Rooted on Decentralized Blockchains
+# A Proposal for Proof of Authority Rooted on Decentralized Blockchains
 
 # Foreward
 
