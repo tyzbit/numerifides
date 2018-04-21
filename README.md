@@ -74,7 +74,7 @@ secure and decentralized.
 
 * CONSENSUS: The method by which the decentralized Numerifides consensus protocol agrees to the state of Numerifides
 
-* CSV: CheckLockTimeVerify – an encumbrance on spending funds until a certain number of Bitcoin (measured in blocks in a blockchain) have passed.
+* CSV: CheckSequenceVerify – an encumbrance on spending funds until a certain number of Bitcoin (measured in blocks in a blockchain) have passed.
 
 * UPDATE: The process whereby a name→data mapping can be changed or RENEWED by the owner of the private key locking the funds. As with usual cryptocurrency transactions, the funds are fully spent
 
@@ -109,12 +109,12 @@ In order to secure a human readable authoritative “name” out of the possible
 
 ```
 OP_IF
-	[bindata1] [bindata2] OP_2DUP # duplicate the first two inputs
+	OP_2DUP # duplicate the first two inputs
 	OP_EQUAL # push an equals onto the stack
 	OP_NOT OP_VERIFY #ensure the two pieces of data are not equal
-	[hashdata1] OP_SHA1 # hash the first data
+	OP_SHA1 # hash the first data
 	OP_SWAP # swap top 2 items on stack
-	[hashdata2] OP_SHA1 # hash the second data
+	OP_SHA1 # hash the second data
 OP_EQUAL #Ensure the two hashes match (Proof of Work)
 OP_ELSE # allow the funds to be re-spent after CSV expires
 	<signature> CheckSigVerify
@@ -245,7 +245,7 @@ looked up via Numerifides.
 
 # Economic rationale:
 
-Any user wishing to “register” a name simply needs to “mine” a valid numerifide
+Any user wishing to “register” a name simply needs to construct a valid numerifide
 transaction that locks up a specific amount of value for an amount of time.  
 If the name registered is not disputed or contentious, the data associated with
 the name can be trusted in a decentralized way.  Names that are unique and not so
@@ -254,19 +254,15 @@ on Numerifides. A user with some small amount of Bitcoin wishing to register a
 name→data mapping special to them but mostly meaningless to others can easily do
 so with very little investment.  The user simply performs some small amount of
 work of a Proof of Work function, constructs the creation transaction along with
-a sufficiently long CheckLockTimeVerify, and the Bitcoin network adds it to its
+a sufficiently long CheckSequenceVerify, and the Bitcoin network adds it to its
 open and public blockchain.
 
 Users who wish to register a popular name such as “SATOSHI” or “BITCOIN” to
-"namesquat" will necessarily have to secure their name with appropriate means.  
-This can be done via a as high Proof of Proof of Work mechanism for users not
-willing to lock up many Bitcoin funds but with a large amount of Bitcoin, it can
-be done via a “Proof of Hodling” mechanism (a longer CSV on the numerifide)
-for users not willing to submit the anticipated necessary Proof of Work to secure a name.
+"namesquat" will necessarily have to lock up some funds and if someone solves their
+transaction puzzle, they can "unseat" the registration.
 
 When a user attempts to register a name that any malicious actor wishes to censor,
-the user must include the anticipated appropriate fee, and a minimum Proof of Work
-to prevent the name being “snatched” before it can confirm.  Because of this, users
+the user must include the anticipated appropriate fee.  Because of this, users
 will be incentivized to “mine” their own names so as to ensure they can broadcast
 a higher Proof of Work should a malicious actor wish to attempt to “steal” their name.
 If a user fails to contest their name via the combination of Proof of Hodling and
