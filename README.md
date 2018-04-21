@@ -131,7 +131,7 @@ either:
 
 * P2WSH (BIP-0016)
 
-With no additional considerations.)
+With no additional considerations.
 
 Where [user data] refers to data in any of these formats:
 
