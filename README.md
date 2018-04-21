@@ -160,7 +160,7 @@ consensus algorithm are defined below:
 
 # NUMERIFIDES RULES OF CONSENSUS
 
-These rules MUST BE evaluated in this order, with rules that have a lower number being superceded by rules with a higher number.
+These rules MUST BE evaluated in this order, with rules that have a lower number being superseded by rules with a higher number.
 
 For example, a Numerifides transaction with more matching digits between the TXID hash and the included Proof of Work takes precedence over any amount of Proof of Work.
 
@@ -222,13 +222,11 @@ Constant length 2+-byte data field | Proposed Data Standard          | Separator
 Implementations of the Numerifides Trust Consensus Protocol will fall into two categories:
 “namemining” nodes, and “simple” nodes.
 
-“Name miners”: If the user wishes to further secure their already TRUSTED name
-against being CONTESTED can choose to preemptively mine their next update (that
-is a transaction that proves sufficient proof of work and also doesn't violate
-any rules) after their first update becomes TRUSTED.  A node can be a “namemining”
-node or not, as the user sees fit according to the risk of attack of their name
-(a name such as “XESPQCGGBHHX7BCN1VNR” is less likely to have the risk of being
-CONTESTED than a name like “SATOSHI”) .  
+“Name miners”: If the user wishes to "unseat" a TRUSTED name, they can mine a SHA1
+collision of a registered name and if they find one, they can redeem the inputs.
+However, once they redeem the inputs, anyone else can use the same answer, so it
+could be the case that any "solved" puzzle ends up going to some miner who snatches
+the funds from the user who found the collision.
 
 "Simple" or "light" nodes: The storage of the entire block chain, while necessary
 to retain a full index of numerifides if one wishes, is not necessary to perform
