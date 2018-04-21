@@ -26,7 +26,7 @@ can verify any other actor’s statement of authority in a decentralized, fair a
 privacy-protective manner.
 
 I propose this system be called the Numerifides (capitalized) Trust Consensus
-Protocol, or Numerifides (Nu-mer-ih-fie-dees) for short.  Transactions using this
+Protocol, or Numerifides (Nu-mer-ih-fih-dees) for short.  Transactions using this
 system are to be called “numerifide(noun) transactions” (nu-mer-ih-fi’d) or
 “numerifides (lowercase)” (nu-mer-ih-fi-dz) and trusted mappings to be referred
 to as numerified(verb) numerifides(plural noun) or Numerifides transactions).
