@@ -102,7 +102,7 @@ secure and decentralized.
 
 * PROOF OF PROOF OF WORK (TRANSACTION PUZZLE): A specific set of Script OPCODES that prove a minimum amount of work was done to arrive at a particular hash.  Essentially synonymous with a Transaction Puzzle.
 
-HODL: A drunken misspelling of HOLD.
+* HODL: A drunken misspelling of HOLD.
 
 # Technical proposal
 In order to secure a human readable authoritative “name” out of the possible “namespaces”, a user constructs and signs a transaction from an unspent output address funding a “numerifide” transaction with the below Script:
