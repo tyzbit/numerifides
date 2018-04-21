@@ -74,19 +74,19 @@ secure and decentralized.
 
 * CONSENSUS: The method by which the decentralized Numerifides consensus protocol agrees to the state of Numerifides
 
-* CLTV: CheckLockTimeVerify – an encumbrance on spending funds until a certain number of Bitcoin (measured in blocks in a blockchain) have passed.
+* CSV: CheckLockTimeVerify – an encumbrance on spending funds until a certain number of Bitcoin (measured in blocks in a blockchain) have passed.
 
 * UPDATE: The process whereby a name→data mapping can be changed or RENEWED by the owner of the private key locking the funds. As with usual cryptocurrency transactions, the funds are fully spent
 
 * RENEW: A numerifide transaction that keeps the node→data mapping the same, but moves the funds from an EXPIRED numerifide to a numerified numerifide
 
-* RELEASE(D): A name that is no longer TRUSTED due to expiry of the encumbering CLTV.
+* RELEASE(D): A name that is no longer TRUSTED due to expiry of the encumbering CSV.
 
 * REVOKE(D): A name that is CONTESTED due to a spend from the “Transaction Puzzle” portion of the transaction.
 
 * CONTESTED: A name (and by extension a numerifide) that is SWEPT via proof of work of the TRANSACTION PUZZLE.
 
-* CONTEST: A incentive mechanism whereby names can be wrestled from their owners with a combination of Proof of Work and making owned funds unspendable via CLTV encumberances.
+* CONTEST: A incentive mechanism whereby names can be wrestled from their owners with a combination of Proof of Work and making owned funds unspendable via CSV encumberances.
 
 * TRANSACTION PUZZLE: A series of Script OPCODEs that provide for Proof of Work on a specific numerifide.
 
@@ -178,7 +178,7 @@ For example, a Numerifides transaction with more matching digits between the TXI
 
 7. The name reserved MUST NOT BE any combination of case for the name “NUMERIFIED” OR “NUMERIFIDE”.
 
-8. If the CLTV encumbrance on a numerifide expires, the numerifide MUST NOT BE TRUSTED.
+8. If the CSV encumbrance on a numerifide expires, the numerifide MUST NOT BE TRUSTED.
 
 9. If a numerifide is confirmed with 6 blocks of confirmation, it MUST BE TRUSTED IF NO OTHER RULE IS VIOLATED.
 
@@ -263,7 +263,7 @@ Users who wish to register a popular name such as “SATOSHI” or “BITCOIN”
 "namesquat" will necessarily have to secure their name with appropriate means.  
 This can be done via a as high Proof of Proof of Work mechanism for users not
 willing to lock up many Bitcoin funds but with a large amount of Bitcoin, it can
-be done via a “Proof of Hodling” mechanism (a longer CLTV on the numerifide)
+be done via a “Proof of Hodling” mechanism (a longer CSV on the numerifide)
 for users not willing to submit the anticipated necessary Proof of Work to secure a name.
 
 When a user attempts to register a name that any malicious actor wishes to censor,
