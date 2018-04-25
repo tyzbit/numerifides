@@ -36,10 +36,10 @@ Fidēs, the goddess of trust and good faith.
 # Outline
 
 I propose a novel new transaction type, dubbed a “numerifide” transaction,
-compatible with Bitcoin that allows a transaction to be created that associates
-an authority over a given “name” and associates user-supplied data to it.  In this way,
-a human-meaningful “name” can be registered in a decentralized way that associates with a
-“value” that provides some utility, such as (but not limited to):
+compatible with Bitcoin that allows a transaction to be created that creates
+decentralized authority over a given “name” and associates user-supplied data to it.
+In this way, a human-meaningful “name” can be registered in a decentralized way
+that associates with a “value” that provides some utility, such as (but not limited to):
 
 * Associating a specific username to a Bitcoin address to provide cryptographic
 proof of ownership of the username, receiving Bitcoin funds, or optionally using
@@ -49,13 +49,14 @@ the Bitcoin key to sign messages.
 
 * Authenticating an “alias” for an Lightning Network node→node pubkey
 
+* DNS -> IP mappings
+
 In addition, the user can alter this data in a secure, uncensorable way via
 already existing mining mechanisms present in Bitcoin as well as incentive and
-disincentive structures I will outline below. Further, “abandoned names” can be
-claimed via a Proof of Work mechanism, and incentives are structured such that
-“namesquatting” valuable names is disincentivized. This system creates a fair
-and just way of reserving, updating, revoking via consensus and abandoning names
-in a way that solves Zooko’s triangle of useful names being memorable,
+disincentive structures I will outline below. Further, incentives are structured
+such that “namesquatting” valuable names is disincentivized. This system creates
+a fair and just way of reserving, updating, revoking via consensus and abandoning
+names in a way that solves Zooko’s triangle of useful names being memorable,
 secure and decentralized.
 
 # Terminology used:
@@ -68,7 +69,7 @@ secure and decentralized.
 
 * TRUST: The method whereby a general mapping of names to data formalized in a “numerifide” transaction can be independently verified to be UNDISPUTED.
 
-* TRUSTED: A “numerified” “numerifide” Numerifides transaction.
+* TRUSTED: A “numerified” “numerifide” Numerifides transaction.  A valid, trusted, name mapping.
 
 * MUST, MAY, SHOULD, SHOULD NOT, MUST NOT: Used as defined in RFC-21192
 
@@ -78,17 +79,7 @@ secure and decentralized.
 
 * UPDATE: The process whereby a name→data mapping can be changed or RENEWED by the owner of the private key locking the funds. As with usual cryptocurrency transactions, the funds are fully spent
 
-* RENEW: A numerifide transaction that keeps the node→data mapping the same, but moves the funds from an EXPIRED numerifide to a numerified numerifide
-
-* RELEASE(D): A name that is no longer TRUSTED due to expiry of the encumbering CSV.
-
-* REVOKE(D): A name that is CONTESTED due to a spend from the “Transaction Puzzle” portion of the transaction.
-
-* CONTESTED: A name (and by extension a numerifide) that is SWEPT via proof of work of the TRANSACTION PUZZLE.
-
-* CONTEST: A incentive mechanism whereby names can be wrestled from their owners with a combination of Proof of Work and making owned funds unspendable via CSV encumberances.
-
-* TRANSACTION PUZZLE: A series of Script OPCODEs that provide for Proof of Work on a specific numerifide.
+* RELEASE(D)/EXPIRE(D): A name that is no longer TRUSTED due to expiry of the encumbering CSV.
 
 * LOCK(ED): Funds that are unspendable until AFTER a specific period of time has passed measured in Bitcoin blocks.
 
@@ -100,244 +91,184 @@ secure and decentralized.
 
 * PROOF OF WORK: A method of evaluating a resulting hash to be able to prove a specific amount of work was done to produce the hash.
 
-* PROOF OF PROOF OF WORK (TRANSACTION PUZZLE): A specific set of Script OPCODES that prove a minimum amount of work was done to arrive at a particular hash.  Essentially synonymous with a Transaction Puzzle.
-
 * HODL: A drunken misspelling of HOLD.
 
 # Technical proposal
-In order to secure a human readable authoritative “name” out of the possible “namespaces”, a user constructs and signs a transaction from an unspent output address funding a “numerifide” transaction with the below Script:
+In order to secure a human readable authoritative “name” out of the possible
+“namespaces”, a user constructs and signs a transaction from an unspent output
+address funding a “numerifide” transaction with the below Script:
 
 ```
-OP_IF
-	OP_2DUP # duplicate the first two inputs
-	OP_EQUAL # push an equals onto the stack
-	OP_NOT OP_VERIFY #ensure the two pieces of data are not equal
-	OP_SHA1 # hash the first data
-	OP_SWAP # swap top 2 items on stack
-	OP_SHA1 # hash the second data
-OP_EQUAL #Ensure the two hashes match (Proof of Work)
-OP_ELSE # allow the funds to be re-spent after CSV expires
-	<signature> CheckSigVerify
-[user data] OP_PUSHDATA[1, 2 or 4]
-[any number between 144 and 52,560] CHECKSEQUENCEVERIFY
+<blocks> OP_CHECKSEQUENCEVERIFY OP_DROP <C> OP_CHECKSIG
 ```
 
-(Numerifides transactions such as this MUST also enable Replace-by-fee (RBF) on the funding transaction for reasons outlined below.)
+Where <blocks> is between 144 (1 day) and 52560 (1 year) and <C> is constructed like so:
 
-Numerifides transactions can also substitute the specific CheckSigVerify for
-either:
+1.  Generate a secret private key p = random() and the public key P = p * G.
+2.  Encode the Numerifides command (see below)
+3.  Compute the pay-to-contract public key: C = P + h(P || command) * G.  This has corresponding private key c = p + h(P || command) that only the user knows.
+4.  Generate a P2WSH to the script: <52560 blocks> OP_CHECKSEQUENCEVERIFY OP_DROP <C> OP_CHECKSIG
+5.  Pay to that P2WSH on the Bitcoin network.
+6.  Broadcast command, P, and the txid+outnum of the UTXO that pays to the P2WSH above, to the Numerifides network (not the Bitcoin network, Bitcoin cannot understand it).
 
-* CheckMultiSigVerify or
+(Numerifides transactions such as this SHOULD also enable Replace-by-fee (RBF) on the funding transaction for reasons outlined below.)
 
-* P2WSH (BIP-0016)
+The "command" is a name->data mapping that also includes a second extra portion for a nonce.
 
-With no additional considerations.
+Example: "google.com:127.0.0.1:nonce=11111111111111111"
 
-Where [user data] refers to data in any of these formats:
+The nonce is incremented and many transactions are produced and signed until the
+resulting TXID meets a minimum proof of work acceptable to the user. Since Proof
+of Work and Proof of Hodling are BOTH used to determine the level of TRUST, a user
+registering a popular or contentious name should probably lock up significant funds
+and ALSO "mine" their name out of the reach of anyone else.
 
-Format                   | Script OPCODE | Notes
--------------------------|---------------|------
-[name]:[data-type][data] | OP_PUSHDATA1  | (Must be less than 255 total bytes to be a valid transaction according to my understanding of the rules today)
-[name]:[data-type][data] | OP_PUSHDATA2  | (Must be less than 511 total bytes to be a valid transaction according to my understanding of the rules today)
-[name]:[data-type][data] | OP_PUSHDATA4  | (Must be less than 1023 total bytes to be a valid transaction according to my understanding of the rules today)
+The nonce is NOT evaluated as part of the mapping when checking for duplicates.
+For example, although the nonces are the same, the data is different and thus the mapping is different.
 
-Further, the hash in the proof of work included in the transaction must also
-match at least 1 digit of the resulting TXID, which prevents “premine” attacks
-against names that malicious actors first see in the numerifides transaction and
-decide are valuable enough to attack.  Every additional digit that matches is
-proof of more work done, and thus would be TRUSTed over a transaction that didn’t match.
+"google.com:127.0.0.1:nonce=1111"
+"google.co:127.0.0.1:nonce=1111"
 
-Consensus mechanism:  Since the transaction outlined above is constructable by
-anyone who can find a SHA1 collision of some two pieces of secret data and
-publish a transaction spending the inputs LOCKED at this address, a simple
-consensus mechanism is necessary to allow users a set of rules for CREATING
-UPDATING and REVOKING via consensus mechanisms.
-
-Assigning TRUST to “Numerifide” name→data mappings
-TRUSTING UPDATES to “Numerifide” name→data mappings
-and RELEASING “abandoned” "Numerifide" name→data mappings.  The rules of the
-consensus algorithm are defined below:
+A user will broadcast the transaction, wait for it to be mined for a few blocks,
+and then announce it and the mapping they registered later so that miners cannot
+censor registrations.
 
 # NUMERIFIDES RULES OF CONSENSUS
 
-These rules MUST BE evaluated in this order, with rules that have a lower number being superseded by rules with a higher number.
+Numerifides mappings use the following formula to determine TRUST, with the winning
+transaction being FULLY TRUSTED and any other transactions being UNTRUSTED (through
+the user MAY be notified about the untrusted mappings outside of the protocol itself)
 
-For example, a Numerifides transaction with more matching digits between the TXID hash and the included Proof of Work takes precedence over any amount of Proof of Work.
+```
+( T * P ) + ( T * B ) = TRUST
+```
 
-1. The FIRST transaction as seen on the Bitcoin blockchain to create a “numerified” name→data mapping (a “numerifide”) from the “namespace” is TRUSTED BEFORE any SUBSEQUENT ones, IF NO OTHER RULE IS VIOLATED
+Where:
+```
+T = Timelock length (CheckSequenceVerify)
+P = Proof of Work
+B = Bitcoin locked up.
+```
 
-2. All other criteria equal, the LONGEST LOCKED transaction is valid OVER any lower time-locked transactions, IF NO OTHER RULE IS VIOLATED
+# EXAMPLE REGISTRATIONS
 
-3. All other criteria equal, the HIGHEST value transaction is valid BEFORE any lower values ones, IF NO OTHER RULE IS VIOLATED
+A user that locks up 1BTC for 144 blocks and provides a Proof of Work of 2 would then
+have a TRUST level of 432.
 
-4. All other criteria equal, the MOST MATCHING DIGITS of the transaction ID of a specific numerifide is TRUSTED, IF NO OTHER RULE IS VIOLATED.
+`( 144 * 2 ) + ( 144 * 1 ) = 432`
 
-5. All other criteria equal, the MOST PROOF OF WORK in the “numerifide” CONTEST section of the script is TRUSTED over any lower proof of work transactions, IF NO OTHER RULE IS VIOLATED
+A user that wishes to "take over" the name (keeping the locktime the same),
+but doesn't have as much Bitcoin could mine until a 3 and "unseat the name" with
+any amount of bitcoin above 1 (0.5 in this example):
 
-6. The timelock on the transaction MUST NOT BE longer than 52,560 blocks (roughly equivalent to one year as perceived by the Bitcoin blockchain), and MUST BE longer than 144 blocks in length (one day).
+`( 144 * 3 ) + ( 144 * 0.5 ) = 504`
 
-7. The name reserved MUST NOT BE any combination of case for the name “NUMERIFIED” OR “NUMERIFIDE”.
+In this way, names are secured primarily by locktime and Proof of Work, but secondarily
+by amount of Bitcoin locked up.
 
-8. If the CSV encumbrance on a numerifide expires, the numerifide MUST NOT BE TRUSTED.
+If the previous user wanted to secure their name with the same Proof of Work and
+amount locked up, she simply could increase the locktime to the max of 1 year:
 
-9. If a numerifide is confirmed with 6 blocks of confirmation, it MUST BE TRUSTED IF NO OTHER RULE IS VIOLATED.
+`( 52,560 * 2 ) + ( 52,560 * 1 ) = 157,680`
 
-10. In the event of a chain split longer than 6 blocks, numerifides present in the contested blocks MUST NOT BE TRUSTED EVEN IF NO OTHER RULE IS VIOLATED until the LONGEST chain with the winning numerifide transaction has settled with twice the length of the previous block parameter, proposed to be 6.
+The previous user, if wishing to unseat this name would need to also increase the locktime
+of their funds to 1 year, beat the Proof of Work and then provide any amount of Bitcoin.
 
-11. If the inputs locked in a “numerifide” are spent via a CONTEST transaction, the numerifide is said to be CONTESTED and MUST NOT BE TRUSTED.  The next numerifide added to the chain longer than 6 blocks MUST BE TRUSTED IF NO OTHER RULE IS VIOLATED.
-
-12. Numerifide transactions MUST TRUST a numerifide with no data, EVEN IF NO OTHER RULE IS VIOLATED.
-
-13. Numerifide transactions MUST include a name but MAY include no data.  This is done by omitting the OP_PUSHDATA Script OPCODE
-
-14. Names in numerifides SHOULD BE case-insensitive, and using English characters. Names MAY BE any valid combination of valid data that fits in an overall transaction.
-
-15. The target data MUST BE identified with an encoding, as defined in a simple proposed spec below.
-
-16. If every other rule is not violated, a USER MUST accept the name→data mapping as TRUSTED.
-
-17.  A Numerifide transaction MUST use the table below to add a relevant data encoding to their attached data, IF it is included.
-
-18. A Numerifide transaction MAY choose the incorrect data encoding for their attached data.
-
-19. Numerifide transactions MUST USE ASCII characters only.
-
-20. Numerifide transactions MUST allow data of any length to be attached to a name for ANY encoding, IF NO OTHER RULE IS VIOLATED
+`( 52,560 * 3 ) + ( 52,560 * >0 ) = 157,680+`
 
 # PROPOSED DATA ENCODING TABLE:
 
+Mappings should be [datatype][name][separator][data].
+
 ( Separator is proposed to be 0xFF but others could be used )
 
-Constant length 2+-byte data field | Proposed Data Standard          | Separator | Description
------------------------------------|---------------------------------|-----------|-------------
-00                                 | Private Usage                   | 0xFF      | The data associated with the name has no explicitly stated purpose. The data SHOULD NOT be used to verify any other consensus-approved data standard.
-01                                 | Bitcoin Address                 | 0xFF      | The data associated with the name SHOULD BE used to TRUST that the Bitcoin address is controlled by the name it is associated to.
-02                                 | Lightning Node Public Key       | 0xFF   | The data associated with the name SHOULD BE used to TRUST an advertised ALIAS of a Lightning node.
-03                                 | GPG Public Key                  | 0xFF      | The data associated with the name SHOULD BE used to TRUST a GPG Public Key
-04                                 | Domain-validated Certificate     | 0xFF      | The data SHOULD BE a domain certificate for the specific name in in DOMAIN.TLD format.
-05                                 | DNS mapping                      | 0xFF      | The data SHOULD BE a valid IP address.
-06-FF                              | Future use decided upon via consensus. | 0xFF | Future use
+Constant length 2+-byte data field | Proposed Data Standard                 | Separator | Description
+-----------------------------------|----------------------------------------|-----------|-------------
+00                                 | Private Usage                          | 0xFF      | The data associated with the name has no explicitly stated purpose. The data SHOULD NOT be used to verify any other consensus-approved data standard.
+01                                 | Bitcoin Address                        | 0xFF      | The data associated with the name SHOULD BE used to TRUST that the Bitcoin address is controlled by the name it is associated to.
+02                                 | Lightning Node Public Key              | 0xFF      | The data associated with the name SHOULD BE used to TRUST an advertised ALIAS of a Lightning node.
+03                                 | GPG Public Key                         | 0xFF      | The data associated with the name SHOULD BE used to TRUST a GPG Public Key
+04                                 | Domain-validated Certificate           | 0xFF      | The data SHOULD BE a domain certificate for the specific name in in DOMAIN.TLD format.
+05                                 | DNS mapping                            | 0xFF      | The data SHOULD BE a valid IP address.
+06-FF                              | Future use decided upon via consensus. | 0xFF      | Future use
 
 # Implementations
 Implementations of the Numerifides Trust Consensus Protocol will fall into two categories:
-“namemining” nodes, and “simple” nodes.
+"Full" nodes and "Light" nodes.
 
-“Name miners”: If the user wishes to "unseat" a TRUSTED name, they can mine a SHA1
-collision of a registered name and if they find one, they can redeem the inputs.
-However, once they redeem the inputs, anyone else can use the same answer, so it
-could be the case that any "solved" puzzle ends up going to some miner who snatches
-the funds from the user who found the collision.
+A Full node will have all of the known mappings, and be able to perform lookups locally.
 
-"Simple" or "light" nodes: The storage of the entire block chain, while necessary
-to retain a full index of numerifides if one wishes, is not necessary to perform
-a decentralized lookup for any given name as already existing SPV technologies
-(such as BIP-157 or BIP-158) can be used to look names up in a decentralized and
-censorship-resistant way.  Using already existing filtering technologies, a user
-can trustlessly issue (via Bloom filters or other means) a query in the form of
-a normal filter request against multiple fully validating nodes, receive the
-full block that matches the query, and verify it.  To look this data up again,
-a SPV node can issue a new query to many nodes and simply ensure it matches the
-previous block the node downloaded.
+A Light node will query Full nodes for the transactions and mappings, and then confirm
+via a lookup on the Bitcoin network that the related transactions are valid according
+to consensus rules. Light nodes should query more than one Full node for a lookup,
+and likewise query more than one Bitcoin node to confirm the anchoring Numerifides transaction.
 
 Plugins can be written to interface the client into any legacy lookup standard such as
 creating a virtual Certificate Authority for the system that vouches for certificates
-looked up via Numerifides.
+looked up via Numerifides, or for DNS lookups.
 
 # Economic rationale:
 
-Any user wishing to “register” a name simply needs to construct a valid numerifide
-transaction that locks up a specific amount of value for an amount of time.  
-If the name registered is not disputed or contentious, the data associated with
-the name can be trusted in a decentralized way.  Names that are unique and not so
-memorable, and data that is not contentious will get confirmed and trusted easily
-on Numerifides. A user with some small amount of Bitcoin wishing to register a
-name→data mapping special to them but mostly meaningless to others can easily do
-so with very little investment.  The user simply performs some small amount of
-work of a Proof of Work function, constructs the creation transaction along with
-a sufficiently long CheckSequenceVerify, and the Bitcoin network adds it to its
-open and public blockchain.
+Any user that wishes to register a name must commit scarce resources to do so:
 
-Users who wish to register a popular name such as “SATOSHI” or “BITCOIN” to
-"namesquat" will necessarily have to lock up some funds and if someone solves their
-transaction puzzle, they can "unseat" the registration.
+* Making a variable amount of Bitcoin unspendable for a time
+* Processing time in the form of Proof of Work
 
-When a user attempts to register a name that any malicious actor wishes to censor,
-the user must include the anticipated appropriate fee.  Because of this, users
-will be incentivized to “mine” their own names so as to ensure they can broadcast
-a higher Proof of Work should a malicious actor wish to attempt to “steal” their name.
-If a user fails to contest their name via the combination of Proof of Hodling and
-Proof of Work, the user will be unable to retain their desired name.
+This disincentivzes "namesquatting" because any user that wishes to register a name
+they do not intend to use will lose the use of their Bitcoin, and a user more interested
+in the name could commit more Bitcoin or more Proof of Work and "steal" the name.
 
-Miners will be incentivized to attempt to “snatch” high value names, but are
-disincentivized by the Proof of Hodling, Proof of Work, and the possibility of
-honest miners that wish to continue to mine and collect the Bitcoin block reward
-plus fees rather than attack and censor numerifides transactions.  Further,
-since every transaction broadcast to the network is RBF, a user can “attempt” to
-register a transaction and if it isn’t confirming due to a censorship or to being
-contested, the user can replace their transaction's fee with a higher one to
-essentially enter into a bidding war for the name they want.
+A user that registers a name no one cares to unseat can commit very little Bitcoin
+and provide a low Proof of Work, and register the name for a short time if they wish.
 
-Further, since a numerifide with a Proof of Proof of Work hash with more than
-one matching character to its transaction ID (something that can be precomputed
-noninteractively), essentially any given reservation of a name comes with it the
-creating of a “virtual blockchain” with the genesis block being the first reservation
-of a given name and the difficulty is the Proof of Proof of Work represented by
-matching the first characters of the minimum Transaction Puzzle hash to the TXID.
+A user with a very popular or contentious name mapping (example: DNS for google.com)
+should:
 
-Miners are also incentivized to try to split the chain, and stealth mine popular
-names they anticipate, but are required to lock Bitcoin to be unspendable for the
-duration of time they have the address, so they must choose very carefully which
-names they wish to attack.
+1. Do as much Proof of Work as possible.
+2. Provide the longest locktime possible.
+3. Lock as much Bitcoin as possible
 
-(TODO: further economic analysis/discussion)
+In this order.
+
+Miners can only choose to attempt to censor the whole network, not individual mappings.
+Users locking up Bitcoin make the miner's Bitcoin more valuable so unless there is
+external pressure, miner's should be incentivized to encourage Numerifides transactions.
+
 
 # Example Numerifides registration
 
-User wishes to register the name:data mapping of "Numerifides:[GPG key]".
+User wishes to register the name:data mapping of "03:Numerifides:FF:[GPG key]".
 User creates the appropriate transaction that:
 
 * Pays back to themselves .001 BTC
-
 * Locks the Bitcoin for a duration of 52,160 blocks (1 year)
+* Has an appropriate Proof of Work attached as a TXID hash
 
-* Has an appropriate Proof of Work attached in the form of the transaction puzzle
+User broadcasts this transaction and it is included in a block.  User waits
+6 blocks, and then broadcasts to the Numerifides network the mapping she just
+registered.
 
-User broadcasts this transaction and it is not included in the next 4 blocks.
+The user was the first to broadcast this name, so any full or light node that does
+a lookup for a GPG record for Numerifides should get this new record.
 
-User increases the fee according to the current block space and it is finally included in a block.
-
-User was the first to broadcast this name, so after 6 blocks, user then performs a light client
-lookup against Bitcoin network for mappings that match "Numerifides" and only receives
-a single transaction, the user's.  The user's software evaluates it against consensus
-rules, finds it violates none and provides the user with the mapping on demand and caches it as
-trusted for one year.
-
-Since no other user is interested in registering this name, the transaction puzzle
-is never solved, even by passive crackers who try to crack every name's puzzle.
+Since no other user is interested in registering this name, the Proof of Work
+is enough to secure the name.
 
 # Known issues
 
-Numerifides transactions are prone to being censored, even if they're not contentious
-because for one because as ZmnSCPxj on the lightning-dev mailing list points out,
-they do not pass the IsStandard() check many miners impose on transactions they mine.
+Storage of all mappings is rooted on the blockchain, but gossip about new mappings
+could be partly blocked or censored.  This is also true of Bitcoin itself, so once
+the network is of sufficient size and fault-tolerance, it should be increasingly
+difficult to fully prevent a numerifide from being gossiped about.
 
-Numerifides transactions also bloat the blockchain, perhaps unnecessarily as one
-could commit just a script hash, and reveal the script when it is confirmed on the
-blockchain.  This, also proposed by ZmnSCPxj, would mean all transactions could be one
-size, but the incentive for the secondary network to gossip about mappings is questionable.
+The data is like a blockchain itself, but without links between the numerifides
+transactions.  If the network forgets about a mapping, it would have to be
+gossiped about again.
 
-One way to reduce bloat is to have multiple mappings per transaction, so for example,
-a user wishing to register their GPG key and Lightning node pubkey to the same mapping
-can use a single transaction to do so.
-
-SHA1 collisions are still known to be sufficiently rare and difficult for end users to
-find that it might not be possible to use for the transaction puzzle.  Likewise,
-RIPEMD_160 appears to resist collisions as well, perhaps better than SHA1.
-See https://link.springer.com/chapter/10.1007/11836810_8
+Storage of the mappings could get quite burdensome as users may want to register
+large data mappings.
 
 # REFERENCES
 https://en.wikipedia.org/wiki/Zooko%27s_triangle
 
 https://www.ietf.org/rfc/rfc2119.txt
-
-https://en.bitcoin.it/wiki/Script#Transaction_puzzle
