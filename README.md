@@ -242,7 +242,7 @@ User creates the appropriate transaction that:
 
 * Pays back to themselves .001 BTC
 * Locks the Bitcoin for a duration of 52,160 blocks (1 year)
-* Has an appropriate Proof of Work attached as a TXID hash
+* Has an appropriate Proof of Work advertised via the TXID hash
 
 User broadcasts this transaction and it is included in a block.  User waits
 6 blocks, and then broadcasts to the Numerifides network the mapping she just
