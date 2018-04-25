@@ -35,11 +35,11 @@ Fidēs, the goddess of trust and good faith.
 
 # Outline
 
-I propose a novel new transaction type, dubbed a “numerifide” transaction,
-compatible with Bitcoin that allows a transaction to be created that creates
-decentralized authority over a given “name” and associates user-supplied data to it.
-In this way, a human-meaningful “name” can be registered in a decentralized way
-that associates with a “value” that provides some utility, such as (but not limited to):
+I propose a new transaction type, dubbed a “numerifide” transaction, compatible
+with Bitcoin today that allows a transaction to claim authority in a
+decentralized way over a given “name” and associates user-supplied data to it.
+In this way, a human-meaningful “name” can be registered in a way that associates
+with a “value” that provides some utility, such as (but not limited to):
 
 * Associating a specific username to a Bitcoin address to provide cryptographic
 proof of ownership of the username, receiving Bitcoin funds, or optionally using
@@ -53,11 +53,10 @@ the Bitcoin key to sign messages.
 
 In addition, the user can alter this data in a secure, uncensorable way via
 already existing mining mechanisms present in Bitcoin as well as incentive and
-disincentive structures I will outline below. Further, incentives are structured
+disincentive structures I will outline below. The incentives are structured
 such that “namesquatting” valuable names is disincentivized. This system creates
-a fair and just way of reserving, updating, revoking via consensus and abandoning
-names in a way that solves Zooko’s triangle of useful names being memorable,
-secure and decentralized.
+a fair and just way of reserving, updating, and overriding names, as well as
+letting names expire after the owner no longer wishes to claim them.
 
 # Terminology used:
 
@@ -95,7 +94,7 @@ secure and decentralized.
 
 # Technical proposal
 In order to secure a human readable authoritative “name” out of the possible
-“namespaces”, a user constructs and signs a transaction from an unspent output
+“namespaces”, a user constructs and signs a transaction from a previously unspent output
 address funding a “numerifide” transaction with the below Script:
 
 ```
@@ -111,15 +110,13 @@ Where <blocks> is between 144 (1 day) and 52560 (1 year) and <C> is a hash of a 
 5.  Pay to that P2WSH on the Bitcoin network.
 6.  Broadcast command, P, and the txid+outnum of the UTXO that pays to the P2WSH above, to the Numerifides network after some number of blocks
 
-(Numerifides transactions such as this SHOULD also enable Replace-by-fee (RBF) on the funding transaction for reasons outlined below.)
-
-The "command" is a name->data mapping that also includes a second extra portion for a nonce.
+The "command" is a name->data mapping that also includes an additional area for a nonce.
 
 Example: "google.com:127.0.0.1:nonce=11111111111111111"
 
 The nonce is incremented and many transactions are produced and signed until the
-resulting TXID meets a minimum proof of work acceptable to the user. Since Proof
-of Work and Proof of Hodling are BOTH used to determine the level of TRUST, a user
+resulting TXID meets a minimum proof of work acceptable to the user, which is broadcast.
+Since Proof of Work and Proof of Hodling are BOTH used to determine the level of TRUST, a user
 registering a popular or contentious name should probably lock up significant funds
 and ALSO "mine" their name out of the reach of anyone else.
 
@@ -151,7 +148,9 @@ P = Proof of Work
 B = Bitcoin locked up.
 ```
 
-# EXAMPLE REGISTRATIONS
+The name being registered can be any latin character, but MUST BE case-insensitive.
+
+# TRUST LEVELS
 
 A user that locks up 1BTC for 144 blocks and provides a Proof of Work of 2 would then
 have a TRUST level of 432.
@@ -177,7 +176,7 @@ of their funds to 1 year, beat the Proof of Work and then provide any amount of 
 
 `( 52,560 * 3 ) + ( 52,560 * >0 ) = 157,680+`
 
-# PROPOSED DATA ENCODING TABLE:
+# Proposed Data Encoding Table
 
 Mappings should be [datatype][name][separator][data].
 
@@ -208,6 +207,134 @@ Plugins can be written to interface the client into any legacy lookup standard s
 creating a virtual Certificate Authority for the system that vouches for certificates
 looked up via Numerifides, or for DNS lookups.
 
+# Example Numerifides registration
+
+User wishes to register the name:data mapping of "03:Numerifides:FF:[GPG key]".
+User creates the appropriate transaction that:
+
+* Pays back to themselves .001 BTC
+* Locks the Bitcoin for a duration of 52,160 blocks (1 year)
+* Has an appropriate Proof of Work advertised via the TXID hash
+
+User broadcasts this transaction and it is included in a block.  User waits
+6 blocks, and then broadcasts to the Numerifides network the mapping she just
+registered.
+
+The user was the first to broadcast this name, so any full or light node that does
+a lookup for a GPG record for Numerifides should get this new record.
+
+Since no other user is interested in registering this name, the Proof of Work
+is enough to secure the name.
+
+# Second example ("driveby" registration that is unseated)
+
+A user wishes to "namesquat" a name, so they register "05:Google.com:FF:127.0.0.1" with
+1BTC locked up and a Proof of Work of 2 locked up for 52,560 blocks.  In this example,
+lets say it took 1 day of "mining" the transaction to produce that level of Proof of Work.
+
+* T=52,560
+* P=2
+* B=1
+
+
+    ( 52,560 * 2 ) + ( 52,560 * 1 ) = 157,680
+
+Google themselves come along and wish to register the name, but see it is already
+registered. Google happens to have a lot of Bitcoin, and has a lot of processing power
+to "mine" a new transaction.  Google spends some time "mining" and finally transmits a
+transaction with a PoW level of 4, and Google locks up 10BTC, also for 1 year.
+
+* T=52,560
+* P=4
+* B=10
+
+
+    ( 52,560 * 4 ) + ( 52,560 * 10 ) = 735,840
+
+This handily beats the previous registration, which is still locked for the rest
+of the duration of the locktime.
+
+# Third example ("namesquatted" by a user with a lot of BTC)
+
+A user with a large amount of BTC, not a lot of PoW that wishes to "namesquat" registers
+popular usernames on the system.  Let's assume they registered 10,000 names and
+were able to commit 0.5BTC to each of the names with a Proof of Work of 1. Let's
+assume the user only wished to squat the names for a week.
+
+* T=1,008
+* P=1
+* B=0.5
+
+
+    ( 1,008 * 1 ) + ( 1,008 * 0.5 ) = 1,512
+
+The rightful owner of the username wishes to unseat this name, but he doesn't even
+have 0.5BTC.  This user only has 0.1BTC they can lock up to register the name.
+
+The rightful owner only needs to beat the Proof of Work by 1 for the same locktime,
+but the rightful owner would prefer the name to be usable for the longest amount of time,
+so the rightful owner handily beats the namesquatter simply by committing their funds
+for 1 year.  The rightful owner also recognizes this was a name with some value (because
+it was "namesquatted") so he "mines" the transaction until a PoW of 5.
+
+* T=52,560
+* P=1
+* B=0.1
+
+
+    ( 52,560 * 1 ) + ( 52,560 * 0.1 ) = 57,816
+
+# Fourth example (someone with a lot of PoW "DoS"es names)
+
+Lets take the user in the previous namesquatted example with 0.1BTC, and say a
+"name miner" comes along and unseats the name for fun (or profit).  The "name miner"
+can also commit 0.1BTC for one month (4,320 blocks).  Lets say the "name miner"
+has a lot of power, and reaches a Proof of Work of 10:
+
+* T=4,320
+* P=10
+* B=0.1
+
+
+    ( 4,320 * 10 ) + ( 4,320 * 0.1 ) = 43,632
+
+The miner still cannot reach the same level as the previous user before, even though
+the miner did exponentially more work because the miner can't afford to lock up
+that many BTC for that long.
+
+# Fifth example (two similar users want the same name)
+
+Imagine a user registers a name they want (lets say "John Smith") with PoW of 4
+and 0.1BTC locked up:
+
+* T=52,560
+* P=4
+* B=0.1
+
+
+    ( 52,560 * 4 ) + ( 52,560 * 0.1 ) = 215,496
+
+Lets imagine another "John Smith" wants this name, so he registers the same name
+with just a little more Proof of Work (as each additional level is exponentially more
+work):
+
+* T=52,560
+* P=5
+* B=0.1
+
+    ( 52,560 * 5 ) + ( 52,560 * 0.1 ) = 268,056
+
+Imagine the previous user sees they have lost the name, and wishes to keep the registration.
+must send additional funds to their previously committed transaction in order to "reclaim"
+the name.  Since their Proof of Work was one less, the funds they'd need in this scenario is
+
+
+		( 52,570 * 4 ) + ( 52,560 * X ) = 268,056
+
+X becomes any amount above 1.099BTC.  The user can lock up these additional funds and reclaim the name.
+
+The second "John Smith" decides that's too much for the name, and decides to register "John Smith2" instead.
+
 # Economic rationale:
 
 Any user that wishes to register a name must commit scarce resources to do so:
@@ -235,27 +362,12 @@ Miners can only choose to attempt to censor the whole network, not individual ma
 Users locking up Bitcoin make the miner's Bitcoin more valuable so unless there is
 external pressure, miner's should be incentivized to encourage Numerifides transactions.
 
-
-# Example Numerifides registration
-
-User wishes to register the name:data mapping of "03:Numerifides:FF:[GPG key]".
-User creates the appropriate transaction that:
-
-* Pays back to themselves .001 BTC
-* Locks the Bitcoin for a duration of 52,160 blocks (1 year)
-* Has an appropriate Proof of Work advertised via the TXID hash
-
-User broadcasts this transaction and it is included in a block.  User waits
-6 blocks, and then broadcasts to the Numerifides network the mapping she just
-registered.
-
-The user was the first to broadcast this name, so any full or light node that does
-a lookup for a GPG record for Numerifides should get this new record.
-
-Since no other user is interested in registering this name, the Proof of Work
-is enough to secure the name.
-
 # Known issues
+
+If a name is unseated, the BTC are still locked up and essentially useless.  Perhaps
+"levels" of trust should be used rather than explicit TRUSTED or UNTRUSTED.  "namefights"
+like those outlined in the fifth example also mean the loser still has his Bitcoin
+locked up for the full locktime, which is a poor experience for the loser.
 
 Storage of all mappings is rooted on the blockchain, but gossip about new mappings
 could be partly blocked or censored.  This is also true of Bitcoin itself, so once
