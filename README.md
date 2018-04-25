@@ -19,7 +19,7 @@ need not trust the concept of justice to match its execution.
 
 Rather than deriving justice and authority from a system that’s not supposed to
 look but too often does, I propose a DECENTRALIZED CONSENSUS PROTOCOL that
-enables a system of  decentralized authority, whereby an user or actor can assert
+enables a system of decentralized authority, whereby an user or actor can assert
 identity, existence and authority on a public piece of data, on an open blockchain
 and any independent, skeptical user or actor operating the consensus protocol
 can verify any other actor’s statement of authority in a decentralized, fair and
@@ -102,7 +102,7 @@ address funding a “numerifide” transaction with the below Script:
 <blocks> OP_CHECKSEQUENCEVERIFY OP_DROP <C> OP_CHECKSIG
 ```
 
-Where <blocks> is between 144 (1 day) and 52560 (1 year) and <C> is constructed like so:
+Where <blocks> is between 144 (1 day) and 52560 (1 year) and <C> is a hash of a contract constructed like so:
 
 1.  Generate a secret private key p = random() and the public key P = p * G.
 2.  Encode the Numerifides command (see below)
@@ -127,6 +127,7 @@ The nonce is NOT evaluated as part of the mapping when checking for duplicates.
 For example, although the nonces are the same, the data is different and thus the mapping is different.
 
 "google.com:127.0.0.1:nonce=1111"
+
 "google.co:127.0.0.1:nonce=1111"
 
 A user will broadcast the transaction, wait for it to be mined for a few blocks,
