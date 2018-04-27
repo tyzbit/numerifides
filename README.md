@@ -236,8 +236,7 @@ lets say it took 1 day of "mining" the transaction to produce that level of Proo
 * P=2
 * B=1
 
-
-    ( 52,560 * 2 ) + ( 52,560 * 1 ) = 157,680
+`( 52,560 * 2 ) + ( 52,560 * 1 ) = 157,680`
 
 Google themselves come along and wish to register the name, but see it is already
 registered. Google happens to have a lot of Bitcoin, and has a lot of processing power
@@ -248,8 +247,7 @@ transaction with a PoW level of 4, and Google locks up 10BTC, also for 1 year.
 * P=4
 * B=10
 
-
-    ( 52,560 * 4 ) + ( 52,560 * 10 ) = 735,840
+`( 52,560 * 4 ) + ( 52,560 * 10 ) = 735,840`
 
 This handily beats the previous registration, which is still locked for the rest
 of the duration of the locktime.
@@ -265,8 +263,7 @@ assume the user only wished to squat the names for a week.
 * P=1
 * B=0.5
 
-
-    ( 1,008 * 1 ) + ( 1,008 * 0.5 ) = 1,512
+`( 1,008 * 1 ) + ( 1,008 * 0.5 ) = 1,512`
 
 The rightful owner of the username wishes to unseat this name, but he doesn't even
 have 0.5BTC.  This user only has 0.1BTC they can lock up to register the name.
@@ -281,8 +278,7 @@ it was "namesquatted") so he "mines" the transaction until a PoW of 5.
 * P=1
 * B=0.1
 
-
-    ( 52,560 * 1 ) + ( 52,560 * 0.1 ) = 57,816
+`( 52,560 * 1 ) + ( 52,560 * 0.1 ) = 57,816`
 
 # Fourth example (someone with a lot of PoW "DoS"es names)
 
@@ -295,8 +291,7 @@ has a lot of power, and reaches a Proof of Work of 10:
 * P=10
 * B=0.1
 
-
-    ( 4,320 * 10 ) + ( 4,320 * 0.1 ) = 43,632
+`( 4,320 * 10 ) + ( 4,320 * 0.1 ) = 43,632`
 
 The miner still cannot reach the same level as the previous user before, even though
 the miner did exponentially more work because the miner can't afford to lock up
@@ -311,8 +306,7 @@ and 0.1BTC locked up:
 * P=4
 * B=0.1
 
-
-    ( 52,560 * 4 ) + ( 52,560 * 0.1 ) = 215,496
+`( 52,560 * 4 ) + ( 52,560 * 0.1 ) = 215,496`
 
 Lets imagine another "John Smith" wants this name, so he registers the same name
 with just a little more Proof of Work (as each additional level is exponentially more
@@ -322,14 +316,13 @@ work):
 * P=5
 * B=0.1
 
-    ( 52,560 * 5 ) + ( 52,560 * 0.1 ) = 268,056
+`( 52,560 * 5 ) + ( 52,560 * 0.1 ) = 268,056`
 
 Imagine the previous user sees they have lost the name, and wishes to keep the registration.
 must send additional funds to their previously committed transaction in order to "reclaim"
 the name.  Since their Proof of Work was one less, the funds they'd need in this scenario is
 
-
-		( 52,570 * 4 ) + ( 52,560 * X ) = 268,056
+`( 52,570 * 4 ) + ( 52,560 * X ) = 268,056`
 
 X becomes any amount above 1.099BTC.  The user can lock up these additional funds and reclaim the name.
 
