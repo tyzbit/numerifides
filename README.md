@@ -332,7 +332,7 @@ The second "John Smith" decides that's too much for the name, and decides to reg
 
 Any user that wishes to register a name must commit scarce resources to do so:
 
-* Making a variable amount of Bitcoin unspendable for a time
+* Locking a variable amount of Bitcoin to be unspendable for a variable amount of time
 * Processing time in the form of Proof of Work
 
 This disincentivzes "namesquatting" because any user that wishes to register a name
