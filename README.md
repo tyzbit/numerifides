@@ -159,7 +159,7 @@ have a TRUST level of 432.
 
 A user that wishes to "take over" the name (keeping the locktime the same),
 but doesn't have as much Bitcoin could mine until a 3 and "unseat the name" with
-any amount of bitcoin above 1 (0.5 in this example):
+any amount of bitcoin above 0 (0.5 in this example):
 
 `( 144 * 3 ) + ( 144 * 0.5 ) = 504`
 
@@ -357,10 +357,10 @@ external pressure, miner's should be incentivized to encourage Numerifides trans
 
 # Known issues
 
-If a name is unseated, the BTC are still locked up and essentially useless.  Perhaps
-"levels" of trust should be used rather than explicit TRUSTED or UNTRUSTED.  "namefights"
-like those outlined in the fifth example also mean the loser still has his Bitcoin
-locked up for the full locktime, which is a poor experience for the loser.
+If a name is unseated, the original BTC are still locked up and essentially useless.
+Perhaps "levels" of trust should be used rather than explicit TRUSTED or UNTRUSTED.
+"namefights" like those outlined in the fifth example also mean the loser still
+has his Bitcoin locked up for the full locktime, which is a poor experience for the loser.
 
 Storage of all mappings is rooted on the blockchain, but gossip about new mappings
 could be partly blocked or censored.  This is also true of Bitcoin itself, so once
