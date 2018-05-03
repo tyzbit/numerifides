@@ -88,7 +88,9 @@ letting names expire after the owner no longer wishes to claim them.
 
 * USER/ACTOR/NODE: A participant in the Numerifides consensus protocol that independently verifies protocol rules are being followed.
 
-* PROOF OF WORK: A method of evaluating a resulting hash to be able to prove a specific amount of work was done to produce the hash.
+* PROOF OF WORK/PoW: A method of evaluating a resulting hash to be able to prove a specific amount of work was done to produce the hash.
+
+* PROOF OF HODLING/PoH: A locktime encumberance on spending the Bitcoin locked up by a Numerifides registration transaction.
 
 * HODL: A drunken misspelling of HOLD.
 
@@ -135,10 +137,13 @@ censor registrations.
 
 Numerifides mappings use the following formula to determine TRUST, with the winning
 transaction being FULLY TRUSTED and any other transactions being UNTRUSTED (through
-the user MAY be notified about the untrusted mappings outside of the protocol itself)
+the user MAY be notified about the untrusted mappings outside of the protocol itself).
+
+Each registration is evaluated only per each given data type.  A Bitcoin registration
+of "Numerifides" is distinct from a GPG key registration of "Numerifides".
 
 ```
-( T * P ) + ( T * B ) = TRUST
+( ( T * P ) + ( T * B ) ) / N = TRUST
 ```
 
 Where:
@@ -146,6 +151,7 @@ Where:
 T = Timelock length (CheckSequenceVerify)
 P = Proof of Work
 B = Bitcoin locked up.
+N = The number of previous unlinked occurrences of this name registration + 1
 ```
 
 The name being registered can be any latin character, but MUST BE case-insensitive.
@@ -155,26 +161,40 @@ The name being registered can be any latin character, but MUST BE case-insensiti
 A user that locks up 1BTC for 144 blocks and provides a Proof of Work of 2 would then
 have a TRUST level of 432.
 
-`( 144 * 2 ) + ( 144 * 1 ) = 432`
+`( ( 144 * 2 ) + ( 144 * 1 ) ) / 1 = 432`
 
 A user that wishes to "take over" the name (keeping the locktime the same),
-but doesn't have as much Bitcoin could mine until a 3 and "unseat the name" with
-any amount of bitcoin above 0 (0.5 in this example):
+but doesn't have as much Bitcoin must mine until a PoW of 5 and "unseat the name" with
+any amount more than the amount initially locked :
 
-`( 144 * 3 ) + ( 144 * 0.5 ) = 504`
+`( ( 144 * 5 ) + ( 144 * 1.1 ) / 2 = 439.2`
 
 In this way, names are secured primarily by locktime and Proof of Work, but secondarily
-by amount of Bitcoin locked up.
+by amount of Bitcoin locked up.  Also, "takeovers" require more PoW/Bitcoin/PoH
+than the initial investment. (By the way, to "unseat" the registration a third time would
+require a PoW of 8, and any amount more than the initially locked Bitcoin (1)).
 
 If the previous user wanted to secure their name with the same Proof of Work and
 amount locked up, she simply could increase the locktime to the max of 1 year:
 
-`( 52,560 * 2 ) + ( 52,560 * 1 ) = 157,680`
+`( ( 52,560 * 2 ) + ( 52,560 * 1 ) / 1 = 157,680`
 
 The previous user, if wishing to unseat this name would need to also increase the locktime
-of their funds to 1 year, beat the Proof of Work and then provide any amount of Bitcoin.
+of their funds to 1 year, beat the Proof of Work and then lock up more Bitcoin (1).
 
-`( 52,560 * 3 ) + ( 52,560 * >0 ) = 157,680+`
+`( ( 52,560 * 5 ) + ( 52,560 * >1 ) / 2 = 157,680+`
+
+# Renewing and Updating Registrations
+
+After initially creating a numerifide, a user may "strengthen" it (and keep the PoW
+the same) simply by paying more Bitcoin to the same contract hash.
+
+If a user wants to update their registration (such as to change the data mapping),
+they must wait until their intial coins unlock (with new coins protecting the
+registration or not), and pay _from the initial contract address_ to a new registration.
+Re-registrations like this are "linked", so the `N` in the previous formula stays
+the same, though the user must still do PoW and PoH (which could be more or less
+than the initial registration transaction, up to the user) for the new registration.
 
 # Proposed Data Encoding Table
 
@@ -185,23 +205,45 @@ Mappings should be [datatype][name][separator][data].
 Constant length 2+-byte data field | Proposed Data Standard                 | Separator | Description
 -----------------------------------|----------------------------------------|-----------|-------------
 00                                 | Private Usage                          | 0xFF      | The data associated with the name has no explicitly stated purpose. The data SHOULD NOT be used to verify any other consensus-approved data standard.
-01                                 | Bitcoin Address                        | 0xFF      | The data associated with the name SHOULD BE used to TRUST that the Bitcoin address is controlled by the name it is associated to.
+01                                 | Bitcoin Address                        | 0xFF      | The data associated with the name SHOULD BE used to TRUST that the Bitcoin address is associated to the given name.
 02                                 | Lightning Node Public Key              | 0xFF      | The data associated with the name SHOULD BE used to TRUST an advertised ALIAS of a Lightning node.
 03                                 | GPG Public Key                         | 0xFF      | The data associated with the name SHOULD BE used to TRUST a GPG Public Key
-04                                 | Domain-validated Certificate           | 0xFF      | The data SHOULD BE a domain certificate for the specific name in in DOMAIN.TLD format.
+04                                 | Domain-validated Certificate           | 0xFF      | The data SHOULD BE a domain certificate for the specified name (ex: example.com)
 05                                 | DNS mapping                            | 0xFF      | The data SHOULD BE a valid IP address.
 06-FF                              | Future use decided upon via consensus. | 0xFF      | Future use
 
 # Implementations
+
 Implementations of the Numerifides Trust Consensus Protocol will fall into two categories:
 "Full" nodes and "Light" nodes.
 
-A Full node will have all of the known mappings, and be able to perform lookups locally.
+## Full Nodes
 
-A Light node will query Full nodes for the transactions and mappings, and then confirm
-via a lookup on the Bitcoin network that the related transactions are valid according
-to consensus rules. Light nodes should query more than one Full node for a lookup,
-and likewise query more than one Bitcoin node to confirm the anchoring Numerifides transaction.
+A Full node will have all of the known mappings, and be able to perform lookups
+locally.  Each full node will gossip about mappings to one another, and periodically
+query one another to check consensus about mappings.  A full node should also
+have a copy of the Bitcoin blockchain for maximum security, but it could be possible
+to use a pruned node if the user feels the level of risk is acceptable.
+
+If a mapping was originally censored, once an honest node sees it, it will broadcast
+it to all nodes it knows about.  Honest nodes will see it as either the first
+registration, or a more trusted registration (since it was confirmed before the
+dishonest registration that was gossiped about) and will reorganize the
+registrations for that name/data type accordingly.
+
+The full node spec is still largely unknown, but they may assign trust to their
+peers much like Bitcoin nodes do, and punish bad actors by refusing to propagate
+their updates.
+
+## Light Nodes
+
+A Light node will query multiple Full nodes for the transactions and mappings,
+and then confirm via an SPV lookup on the Bitcoin network that the related
+transactions are valid according to consensus rules. Light nodes should query
+more than one Full node for a lookup, and likewise query more than one Bitcoin
+node to confirm the anchoring Numerifides transaction.
+
+## Plugins
 
 Plugins can be written to interface the client into any legacy lookup standard such as
 creating a virtual Certificate Authority for the system that vouches for certificates
@@ -224,7 +266,8 @@ The user was the first to broadcast this name, so any full or light node that do
 a lookup for a GPG record for Numerifides should get this new record.
 
 Since no other user is interested in registering this name, the Proof of Work
-is enough to secure the name.
+and Proof of Hodling is enough to secure the name, and if the user does nothing else,
+the name becomes available for registration again after 52,160 blocks.
 
 # Second example ("driveby" registration that is unseated)
 
