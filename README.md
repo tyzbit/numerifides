@@ -90,7 +90,7 @@ letting names expire after the owner no longer wishes to claim them.
 
 * PROOF OF WORK/PoW: A method of evaluating a resulting hash to be able to prove a specific amount of work was done to produce the hash.
 
-* PROOF OF HODLING/PoH: A locktime encumberance on spending the Bitcoin locked up by a Numerifides registration transaction.
+* PROOF OF HODLING/PoH: A locktime encumberance on spending the Bitcoin locked in a Numerifides registration transaction.
 
 * HODL: A drunken misspelling of HOLD.
 
@@ -278,8 +278,9 @@ lets say it took 1 day of "mining" the transaction to produce that level of Proo
 * T=52,560
 * P=2
 * B=1
+* N=1
 
-`( 52,560 * 2 ) + ( 52,560 * 1 ) = 157,680`
+`( 52,560 * 2 ) + ( 52,560 * 1 ) / 1= 157,680`
 
 Google themselves come along and wish to register the name, but see it is already
 registered. Google happens to have a lot of Bitcoin, and has a lot of processing power
@@ -289,8 +290,9 @@ transaction with a PoW level of 4, and Google locks up 10BTC, also for 1 year.
 * T=52,560
 * P=4
 * B=10
+* N=2
 
-`( 52,560 * 4 ) + ( 52,560 * 10 ) = 735,840`
+`( 52,560 * 4 ) + ( 52,560 * 10 ) / 2 = 367,920`
 
 This handily beats the previous registration, which is still locked for the rest
 of the duration of the locktime.
@@ -305,8 +307,9 @@ assume the user only wished to squat the names for a week.
 * T=1,008
 * P=1
 * B=0.5
+* N=1
 
-`( 1,008 * 1 ) + ( 1,008 * 0.5 ) = 1,512`
+`( 1,008 * 1 ) + ( 1,008 * 0.5 ) / 1 = 1,512`
 
 The rightful owner of the username wishes to unseat this name, but he doesn't even
 have 0.5BTC.  This user only has 0.1BTC they can lock up to register the name.
@@ -320,8 +323,9 @@ it was "namesquatted") so he "mines" the transaction until a PoW of 5.
 * T=52,560
 * P=1
 * B=0.1
+* N=2
 
-`( 52,560 * 1 ) + ( 52,560 * 0.1 ) = 57,816`
+`( 52,560 * 1 ) + ( 52,560 * 0.1 ) / 2 = 28,908`
 
 # Fourth example (someone with a lot of PoW "DoS"es names)
 
@@ -333,12 +337,14 @@ has a lot of power, and reaches a Proof of Work of 10:
 * T=4,320
 * P=10
 * B=0.1
+* N=1
 
-`( 4,320 * 10 ) + ( 4,320 * 0.1 ) = 43,632`
+`( 4,320 * 10 ) + ( 4,320 * 0.1 ) / 3 = 14,544`
 
 The miner still cannot reach the same level as the previous user before, even though
 the miner did exponentially more work because the miner can't afford to lock up
-that many BTC for that long.
+that many BTC for that long, and because the miner is the 3rd user to try to register
+the name.
 
 # Fifth example (two similar users want the same name)
 
@@ -348,28 +354,34 @@ and 0.1BTC locked up:
 * T=52,560
 * P=4
 * B=0.1
+* N=1
 
-`( 52,560 * 4 ) + ( 52,560 * 0.1 ) = 215,496`
+`( 52,560 * 4 ) + ( 52,560 * 0.1 ) / 1 = 215,496`
 
 Lets imagine another "John Smith" wants this name, so he registers the same name
-with just a little more Proof of Work (as each additional level is exponentially more
-work):
+with double the Proof of Work (as each additional level is exponentially more
+work).  He also needs twice the Bitcoin to pass the threshold for the same locktime:
 
 * T=52,560
 * P=5
 * B=0.1
+* N=2
 
-`( 52,560 * 5 ) + ( 52,560 * 0.1 ) = 268,056`
+`( 52,560 * 8 ) + ( 52,560 * 0.2+ ) / 2 = 215,496+`
 
 Imagine the previous user sees they have lost the name, and wishes to keep the registration.
-must send additional funds to their previously committed transaction in order to "reclaim"
-the name.  Since their Proof of Work was one less, the funds they'd need in this scenario is
+The user can send additional funds to their initial contract hash in order to "reclaim"
+the name.  Since their registration was first, they just need to add enough funds
+to beat the previous name:
 
-`( 52,570 * 4 ) + ( 52,560 * X ) = 268,056`
-
-X becomes any amount above 1.099BTC.  The user can lock up these additional funds and reclaim the name.
+`( 52,560 * 4 ) + ( 52,560 * 0.11 ) / 1 = 216,021.6`
 
 The second "John Smith" decides that's too much for the name, and decides to register "John Smith2" instead.
+
+The second John Smith's still owns his Bitcoin, but they're unspendable for the duration
+of his attempted registration.  This means if you want to unseat a name, you should
+be prepared to do more than _the square_ of the initial PoW than the original registrant
+did, if all other parameters are equal.
 
 # Economic rationale:
 
