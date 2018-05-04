@@ -114,7 +114,17 @@ Where <blocks> is between 144 (1 day) and 52560 (1 year) and <C> is a hash of a 
 
 The "command" is a name->data mapping that also includes an additional area for a nonce.
 
-Example: "google.com:127.0.0.1:nonce=11111111111111111"
+#### Example Command: "05:google.com:127.0.0.1:11111111111111111"
+
+Breakdown:
+
+Field             | Explanation
+------------------|--------------
+05                | Data type, (05 currently proposed to be DNS type)
+google.com        | Name registration.
+127.0.0.1         | Data for the name to map to
+11111111111111111 | Nonce
+
 
 The nonce is incremented and many transactions are produced and signed until the
 resulting TXID meets a minimum proof of work acceptable to the user, which is broadcast.
@@ -125,9 +135,11 @@ and ALSO "mine" their name out of the reach of anyone else.
 The nonce is NOT evaluated as part of the mapping when checking for duplicates.
 For example, although the nonces are the same, the data is different and thus the mapping is different.
 
-"google.com:127.0.0.1:nonce=1111"
+"05:google.com:127.0.0.1:1111"
 
-"google.co:127.0.0.1:nonce=1111"
+"05:google.co:127.0.0.1:1111"
+
+Only the data type and name are compared to determine if the mapping is a duplicate.
 
 A user will broadcast the transaction, wait for it to be mined for a few blocks,
 and then announce it and the mapping they registered later so that miners cannot
@@ -210,7 +222,9 @@ Constant length 2+-byte data field | Proposed Data Standard                 | Se
 03                                 | GPG Public Key                         | 0xFF      | The data associated with the name SHOULD BE used to TRUST a GPG Public Key
 04                                 | Domain-validated Certificate           | 0xFF      | The data SHOULD BE a domain certificate for the specified name (ex: example.com)
 05                                 | DNS mapping                            | 0xFF      | The data SHOULD BE a valid IP address.
-06-FF                              | Future use decided upon via consensus. | 0xFF      | Future use
+06                                 | Tor mapping                            | 0xFF      | The data SHOULD BE an Tor onion address.
+07                                 | Software Signing Key                   | 0xFF      | The data SHOULD BE a public key to verify signed software packages.
+08-FF                              | Future use decided upon via consensus. | 0xFF      | Future use
 
 # Implementations
 
