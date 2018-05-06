@@ -28,7 +28,7 @@ privacy-protective manner.
 I propose this system be called the Numerifides (capitalized) Trust Consensus
 Protocol, or Numerifides (Nu-mer-ih-fih-dees) for short.  Transactions using this
 system are to be called “numerifide(noun) transactions” (nu-mer-ih-fi’d) or
-“numerifides (lowercase)” (nu-mer-ih-fi-dz) and trusted mappings to be referred
+“numerifides" (lowercase) (nu-mer-ih-fi-dz) and trusted mappings to be referred
 to as numerified(verb) numerifides(plural noun) or Numerifides transactions).
 This is derived from the latin word numeris for number, and the Roman goddess
 Fidēs, the goddess of trust and good faith.
@@ -51,12 +51,17 @@ the Bitcoin key to sign messages.
 
 * DNS -> IP mappings
 
+* Public keys for signing software
+
 In addition, the user can alter this data in a secure, uncensorable way via
 already existing mining mechanisms present in Bitcoin as well as incentive and
 disincentive structures I will outline below. The incentives are structured
-such that “namesquatting” valuable names is disincentivized. This system creates
-a fair and just way of reserving, updating, and overriding names, as well as
-letting names expire after the owner no longer wishes to claim them.
+such that “namesquatting” valuable names is thought to be unfulfilling.
+This system creates a fair and just way of reserving, updating, and confiscating
+names, as well as letting names expire after the owner no longer wishes to claim them.
+
+Due to the incentive structures, names should be secure, decentralized and human
+meaningful<sup>[1](#ref1)</sup>.
 
 # Terminology used:
 
@@ -70,7 +75,7 @@ letting names expire after the owner no longer wishes to claim them.
 
 * TRUSTED: A “numerified” “numerifide” Numerifides transaction.  A valid, trusted, name mapping.
 
-* MUST, MAY, SHOULD, SHOULD NOT, MUST NOT: Used as defined in RFC-21192
+* MUST, MAY, SHOULD, SHOULD NOT, MUST NOT: Used as defined in RFC-21192<sup>[2](#ref2)</sup>
 
 * CONSENSUS: The method by which the decentralized Numerifides consensus protocol agrees to the state of Numerifides
 
@@ -245,18 +250,21 @@ registration, or a more trusted registration (since it was confirmed before the
 dishonest registration that was gossiped about) and will reorganize the
 registrations for that name/data type accordingly.
 
-Nodes will gossip a "consensus hash" that is derived from every Numerifides
-registration. Each node will hash every Numerifides registration it learns about
-per block sequentially in order of position in the block.  This "Numerifides block hash"
-is then hashed together in sequence to produce a Merkle branch.  These branches are then
-hashed together as assembled until finally a consensus hash is produced for the
-highest known block.  With the conensus hash derived from one's own calculation,
-a full node can know if it's in-line with consensus or not.
+Nodes will gossip a "consensus hash"<sup>[1](https://blockstack.org/whitepaper.pdf)</sup>
+that is derived from every Numerifides registration. Each node will hash every Numerifides
+registration it learns about per block sequentially in order of position in the
+block.  This "Numerifides block hash" is then hashed together in sequence to
+produce a Merkle branch.  These branches are then hashed together as assembled
+until finally a consensus hash is produced for the highest known block.  With
+the conensus hash derived from one's own calculation, a full node can know if
+it agrees with consensus or not.
 
 If the full node is not in consensus with spec, it can query a partner full node
 and ask for its Numerifides Merkle tree.  With this tree, the local full node
 can tell which block(s) it is missing registrations for, and request registrations
-present in those blocks from the partner full node.
+present in those blocks from the partner full node.  If consensus is broken becuase
+the other node is missing data, the local node can pass the data along and "convert"
+this node to our local node's view of consensus.
 
 The full node spec is still largely unknown, but they may assign trust to their
 peers much like Bitcoin nodes do (to guard against Sybil attacks), and punish
@@ -472,8 +480,6 @@ Names on Numerifides are registered in the namespace of each data type.
 Other names in the space are Distributed ID, OneName, and others.
 
 # REFERENCES
-https://en.wikipedia.org/wiki/Zooko%27s_triangle
-
-https://www.ietf.org/rfc/rfc2119.txt
-
-https://blockstack.org/whitepaper.pdf
+- < a id="ref1">[Zooko's Triangle on Wikipedia](https://en.wikipedia.org/wiki/Zooko%27s_triangle)
+- < a id="ref1">[RFC-2119](https://www.ietf.org/rfc/rfc2119.txt)
+- < a id="ref1">[Blockstack's Whitepaper](https://blockstack.org/whitepaper.pdf)
