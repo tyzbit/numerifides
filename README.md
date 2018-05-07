@@ -272,11 +272,12 @@ bad actors by refusing to propagate their updates.
 
 ## Light Nodes
 
-A Light node will query multiple Full nodes for the transactions and mappings,
-and then confirm via an SPV lookup on the Bitcoin network that the related
-transactions are valid according to consensus rules. Light nodes should query
-more than one Full node for a lookup, and likewise query more than one Bitcoin
-node to confirm the anchoring Numerifides transaction.
+A Light node will query multiple Full nodes for the name they want to look up,
+along with the anchoring transaction and the consensus hash and then confirm via
+an SPV lookup on the Bitcoin network that the related transactions are valid according
+to consensus rules. Light nodes should query more than one Full node for a lookup,
+and likewise query more than one Bitcoin node to confirm the anchoring Numerifides
+transaction.
 
 ## Plugins
 
