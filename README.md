@@ -460,10 +460,13 @@ difficult to fully prevent a numerifide from being gossiped about.
 
 The data is like a blockchain itself, but without links between the numerifides
 transactions.  If the network forgets about a mapping, it would have to be
-gossiped about again.
+gossiped about again. This is partially addressed by consensus hashes, as the conensus
+hash should be the same for any given block height.
 
 Storage of the mappings could get quite burdensome as users may want to register
 large data mappings.
+
+Updating mappings, too, is currently a poor user experience.
 
 # Prior art
 
@@ -473,7 +476,7 @@ shortcomings such as the prevalence of "namesquatting".  Also, its mining algori
 was a good choice at the time as the second crypto, but is a security liability
 as one of hundreds of cryptos today.
 
-Blockstack also has the Blockchain Name System where TLDs can be registered and
+Blockstack also has the Blockchain Name System<sup>[3](#ref3)</sup> where TLDs can be registered and
 pricing schemes can be devised for any name being registered in the namespace.
 This is distinct from Numerifides because TLDs can be "namesquat" or federated.
 Names on Numerifides are registered in the namespace of each data type.
@@ -481,6 +484,6 @@ Names on Numerifides are registered in the namespace of each data type.
 Other names in the space are Distributed ID, OneName, and others.
 
 # REFERENCES
-- < a id="ref1">[Zooko's Triangle on Wikipedia](https://en.wikipedia.org/wiki/Zooko%27s_triangle)
-- < a id="ref1">[RFC-2119](https://www.ietf.org/rfc/rfc2119.txt)
-- < a id="ref1">[Blockstack's Whitepaper](https://blockstack.org/whitepaper.pdf)
+- < a id="ref1">[Zooko's Triangle on Wikipedia](https://en.wikipedia.org/wiki/Zooko%27s_triangle)</a>
+- < a id="ref2">[RFC-2119](https://www.ietf.org/rfc/rfc2119.txt)</a>
+- < a id="ref3">[Blockstack's Whitepaper](https://blockstack.org/whitepaper.pdf)</a>
