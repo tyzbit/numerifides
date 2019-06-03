@@ -112,7 +112,7 @@ Where <blocks> is between 144 (1 day) and 52560 (1 year) and <C> is a hash of a 
 
 1.  Generate a secret private key p = random() and the public key P = p * G.
 2.  Encode the Numerifides command (see below)
-3.  Compute the pay-to-contract public key: C = P + h(P || command) * G.  This has corresponding private key c = p + h(P || command) that only the user knows.
+3.  Compute the pay-to-contract public key: `C = P + h(P || command) * G`.  This has corresponding private key `c = p + h(P || command)` that only the user knows.
 4.  Generate a P2WSH to the script: <52560 blocks> OP_CHECKSEQUENCEVERIFY OP_DROP <C> OP_CHECKSIG
 5.  Pay to that P2WSH on the Bitcoin network.
 6.  Broadcast command, P, and the txid+outnum of the UTXO that pays to the P2WSH above, to the Numerifides network after some number of blocks
