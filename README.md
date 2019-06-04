@@ -112,23 +112,43 @@ Where <blocks> is between 144 (1 day) and 52560 (1 year) and <C> is a hash of a 
 
 1.  Generate a secret private key p = random() and the public key P = p * G.
 2.  Encode the Numerifides command (see below)
-3.  Compute the pay-to-contract public key: C = P + h(P || command) * G.  This has corresponding private key c = p + h(P || command) that only the user knows.
+3.  Compute the pay-to-contract public key: `C = P + h(P || command) * G`.  This has corresponding private key `c = p + h(P || command)` that only the user knows.
 4.  Generate a P2WSH to the script: <52560 blocks> OP_CHECKSEQUENCEVERIFY OP_DROP <C> OP_CHECKSIG
 5.  Pay to that P2WSH on the Bitcoin network.
 6.  Broadcast command, P, and the txid+outnum of the UTXO that pays to the P2WSH above, to the Numerifides network after some number of blocks
 
 The "command" is a name->data mapping that also includes an additional area for a nonce.
 
-#### Example Command: "05:google.com:127.0.0.1:11111111111111111"
+---
 
-Breakdown:
+There will also be another output on the transaction, typically of only 1 satoshi
+in value, which can have whatever encumberance the user wishes (though typically
+it will be a normal P2WKH or P2WSH address.)
 
-Field             | Explanation
-------------------|--------------
-05                | Data type, (05 currently proposed to be DNS type)
-google.com        | Name registration.
-127.0.0.1         | Data for the name to map to
-11111111111111111 | Nonce
+```
+OP_HASH <hash> OP_EQUAL
+```
+
+The purpose of this is to allow updates to the record after it is committed.
+The original funds are still locked up for the entirety of the CSV, but if the
+data needs to be changed, a new Numerifides transaction with an input from this
+address is allowed to change the registration on the original record.  The datatype
+and the name registration MUST stay the same.
+
+## Example Registration Command:
+```
+05:google.com:127.0.0.1:tb1qyftceqpc48r33584gpsqp2wdy344rsth9jm803:11111111111111111
+```
+
+#### Breakdown:
+
+Field                                      | Explanation
+-------------------------------------------|--------------------------------------------------
+05                                         | Data type, (05 currently proposed to be DNS type)
+google.com                                 | Name registration.
+127.0.0.1                                  | Data for the name to map to
+tb1qyftceqpc48r33584gpsqp2wdy344rsth9jm803 | Authorized update address
+11111111111111111                          | Nonce
 
 
 The nonce is incremented and many transactions are produced and signed until the
@@ -137,12 +157,36 @@ Since Proof of Work and Proof of Hodling are BOTH used to determine the level of
 registering a popular or contentious name should probably lock up significant funds
 and ALSO "mine" their name out of the reach of anyone else.
 
-The nonce is NOT evaluated as part of the mapping when checking for duplicates.
+---
+
+## Updating Mappings
+
+There will be many times that a record needs to be updated, for example if the
+mapping becomes stale (DNS), or if the expiration of the original numerifide is
+approaching and the user wishes to renew it early.
+
+#### Registering the update
+
+A new Numerifides transaction is created **with one of the inputs being the "authorized update address."**
+This transaction is only allowed to update the original record for the original record type.
+Any other scenario and the mapping will be considered UNTRUSTED.
+
+This transaction will also provide an update address that is also authorized to
+register new updates to the record.
+
+### "Strengthening" Registrations
+
+After initially creating a numerifide, a user may "strengthen" it (and keep the PoW
+the same) simply by paying more Bitcoin to the same contract hash.
+
+## Checking for duplicates
+
+The nonce and the authorized address are NOT evaluated as part of the mapping when checking for duplicates.
 For example, although the nonces are the same, the data is different and thus the mapping is different.
 
-"05:google.com:127.0.0.1:1111"
+"05:google.com:127.0.0.1:tb1qy....:1111"
 
-"05:google.co:127.0.0.1:1111"
+"05:google.co:127.0.0.1:tb1qy....:1111"
 
 Only the data type and name are compared to determine if the mapping is a duplicate.
 
@@ -249,11 +293,12 @@ A Full node will have all of the known mappings, and be able to perform lookups
 locally.  Each full node will gossip about mappings to one another, and periodically
 query one another to check consensus about mappings.  A full node should also
 have a copy of the Bitcoin blockchain for maximum security, but it could be possible
-to use a pruned backend node if the user feels the level of risk is acceptable.
+to use a pruned backend node AFTER the initial sync if the user feels the level
+of risk is acceptable.
 
 If a mapping was originally censored, once an honest node sees it, it will broadcast
 it to all nodes it knows about.  Honest nodes will see it as either the first
-registration, or a more trusted registration (since it was confirmed before the
+registration, or a more trusted registration (since it was confirmed before a possible
 dishonest registration that was gossiped about) and will reorganize the
 registrations for that name/data type accordingly.
 
@@ -303,10 +348,11 @@ User creates the appropriate transaction that:
 * Pays back to themselves .001 BTC
 * Locks the Bitcoin for a duration of 52,160 blocks (1 year)
 * Has an appropriate Proof of Work advertised via the TXID hash
+* Can be updated with a key they control
 
 User broadcasts this transaction and it is included in a block.  User waits
-6 blocks, and then broadcasts to the Numerifides network the mapping she just
-registered.
+6 blocks, and then broadcasts the mapping she just registered to the Numerifides
+network registered.
 
 The user was the first to broadcast this name, so any full or light node that does
 a lookup for a GPG record for Numerifides should get this new record.
@@ -331,7 +377,7 @@ lets say it took 1 day of "mining" the transaction to produce that level of Proo
 Google themselves come along and wish to register the name, but see it is already
 registered. Google happens to have a lot of Bitcoin, and has a lot of processing power
 to "mine" a new transaction.  Google spends some time "mining" and finally transmits a
-transaction with a PoW level of 4, and Google locks up 10BTC, also for 1 year.
+transaction with a PoW level of 4(2 days of computing), and Google locks up 10BTC, also for 1 year.
 
 * T=52,560
 * P=4
@@ -341,12 +387,13 @@ transaction with a PoW level of 4, and Google locks up 10BTC, also for 1 year.
 `( 52,560 * 4 ) + ( 52,560 * 10 ) / 2 = 367,920`
 
 This handily beats the previous registration, which is still locked for the rest
-of the duration of the locktime.
+of the duration of the locktime, thereby strongly discouraging registering mappings
+one does not wish to use.
 
 # Third example ("namesquatted" by a user with a lot of BTC)
 
 A user with a large amount of BTC, not a lot of PoW that wishes to "namesquat" registers
-popular usernames on the system.  Let's assume they registered 10,000 names and
+popular usernames on Numerifides.  Let's assume they registered 10,000 names and
 were able to commit 0.5BTC to each of the names with a Proof of Work of 1. Let's
 assume the user only wished to squat the names for a week.
 
@@ -442,6 +489,7 @@ in the name could commit more Bitcoin or more Proof of Work and "steal" the name
 
 A user that registers a name no one cares to unseat can commit very little Bitcoin
 and provide a low Proof of Work, and register the name for a short time if they wish.
+The design of Numerifides was done with being egalitarian in mind.
 
 A user with a very popular or contentious name mapping (example: DNS for google.com)
 should:
@@ -453,15 +501,20 @@ should:
 In this order.
 
 Miners can only choose to attempt to censor the whole network, not individual mappings.
-Users locking up Bitcoin make the miner's Bitcoin more valuable so unless there is
-external pressure, miner's should be incentivized to encourage Numerifides transactions.
+This is because a Numerifides mapping is only broadcast to the network once its
+commitment transaction has had a certain number of confirmations. Users locking
+up Bitcoin make the miner's(and everyone's) Bitcoin more valuable so unless there
+is external pressure, miner's should be incentivized to encourage Numerifides transactions.
 
 # Known issues
 
 If a name is unseated, the original BTC are still locked up and essentially useless.
-Perhaps "levels" of trust should be used rather than explicit TRUSTED or UNTRUSTED.
-"namefights" like those outlined in the fifth example also mean the loser still
-has his Bitcoin locked up for the full locktime, which is a poor experience for the loser.
+The original registrant can try to win back the name with the registration update
+mechanism, but it is a little painful to make ones funds unspendable with nothing
+to show for it. Perhaps "levels" of trust should be used rather than explicit TRUSTED
+or UNTRUSTED.  "Namefights" like those outlined in the fifth example also mean
+the loser still has his Bitcoin locked up for the full locktime, which is a poor
+experience for the loser.
 
 Storage of all mappings is rooted on the blockchain, but gossip about new mappings
 could be partly blocked or censored.  This is also true of Bitcoin itself, so once
@@ -475,8 +528,6 @@ hash should be the same for any given block height.
 
 Storage of the mappings could get quite burdensome as users may want to register
 large data mappings.
-
-Updating mappings, too, is currently a poor user experience.
 
 # Prior art
 
