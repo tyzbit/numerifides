@@ -268,7 +268,10 @@ this node to our local node's view of consensus.
 
 The full node spec is still largely unknown, but they may assign trust to their
 peers much like Bitcoin nodes do (to guard against Sybil attacks), and punish
-bad actors by refusing to propagate their updates.
+bad actors by refusing to propagate their updates.  There may also be a mechanism
+so that full nodes can drop numerifides that don't meet certain criteria, such as
+if the size is too great, or the trust level is too low.  This causes issues with
+the consensus hash system, so this is still an area for improvement.
 
 ## Light Nodes
 
