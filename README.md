@@ -245,6 +245,25 @@ of their funds to 1 year, beat the Proof of Work and then lock up more Bitcoin (
 
 `( ( 52,560 * 5 ) + ( 52,560 * >1 ) / 2 = 157,680+`
 
+# Renewing and Updating Registrations
+
+After initially creating a numerifide, a user may "strengthen" it (and keep the PoW
+the same) simply by paying more Bitcoin to the same contract hash.
+
+If a user wants to update their registration (such as to change the data mapping),
+they must wait until their intial coins unlock (with new coins protecting the
+registration or not), and pay _from the initial contract address_ to a new registration.
+Re-registrations like this are "linked", so the `N` in the previous formula stays
+the same, though the user must still do PoW and PoH (which could be more or less
+than the initial registration transaction, up to the user) for the new registration.
+
+Records also have a grace period before expiring equal to 1/144 the total locktime of
+the original numerifide.  So for a registration of one day (144 blocks), the total grace
+period is 1 block.  A registration of one year has a 365 block grace period, which is 
+under 61 hours; just over two and a half days.  This means for short registrations,
+it's crucial to be able to transmit a renewal numerifide to renew the registration
+or else your mapping will become free for general use.  This applies to all data types.
+
 # Proposed Data Encoding Table
 
 Mappings should be [datatype][name][separator][data].
@@ -301,7 +320,10 @@ this node to our local node's view of consensus.
 
 The full node spec is still largely unknown, but they may assign trust to their
 peers much like Bitcoin nodes do (to guard against Sybil attacks), and punish
-bad actors by refusing to propagate their updates.
+bad actors by refusing to propagate their updates.  There may also be a mechanism
+so that full nodes can drop numerifides that don't meet certain criteria, such as
+if the size is too great, or the trust level is too low.  This causes issues with
+the consensus hash system, so this is still an area for improvement.
 
 ## Light Nodes
 
