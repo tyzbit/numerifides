@@ -213,6 +213,13 @@ Re-registrations like this are "linked", so the `N` in the previous formula stay
 the same, though the user must still do PoW and PoH (which could be more or less
 than the initial registration transaction, up to the user) for the new registration.
 
+Records also have a grace period before expiring equal to 1/144 the total locktime of
+the original numerifide.  So for a registration of one day (144 blocks), the total grace
+period is 1 block.  A registration of one year has a 365 block grace period, which is 
+under 61 hours; just over two and a half days.  This means for short registrations,
+it's crucial to be able to transmit a renewal numerifide to renew the registration
+or else your mapping will become free for general use.  This applies to all data types.
+
 # Proposed Data Encoding Table
 
 Mappings should be [datatype][name][separator][data].
