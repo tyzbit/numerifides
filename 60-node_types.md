@@ -9,13 +9,13 @@ A Full node will have all of the known mappings, and be able to perform lookups
 locally.  Each full node will gossip about mappings to one another, and periodically
 query one another to check consensus about mappings.  A full node should also
 have a copy of the Bitcoin blockchain for maximum security, but it could be possible
-to use a pruned backend node if the user feels the level of risk is acceptable.
-
-If a mapping was originally censored, once an honest node sees it, it will broadcast
-it to all nodes it knows about.  Honest nodes will see it as either the first
-registration, or a more trusted registration (since it was confirmed before the
-dishonest registration that was gossiped about) and will reorganize the
-registrations for that name/data type accordingly.
+to use a pruned backend node to use a pruned backend node AFTER the initial sync
+if the user feels the level of risk is acceptable. If a mapping was originally
+censored, once an honest node sees it, it will broadcast it to all nodes it knows
+about.  Honest nodes will see it as either the first registration, or a more
+trusted registration (since it was confirmed before the dishonest registration
+that was gossiped about) and will reorganize the registrations for that name/data
+type accordingly.
 
 Nodes will gossip a "consensus hash"<sup>1</sup>
 that is derived from every Numerifides registration. Each node will hash every Numerifides
@@ -35,7 +35,10 @@ this node to our local node's view of consensus.
 
 The full node spec is still largely unknown, but they may assign trust to their
 peers much like Bitcoin nodes do (to guard against Sybil attacks), and punish
-bad actors by refusing to propagate their updates.
+bad actors by refusing to propagate their updates.  There may also be a mechanism
+so that full nodes can drop numerifides that don't meet certain criteria, such as
+if the size is too great, or the trust level is too low.  This causes issues with
+the consensus hash system, so this is still an area for improvement.
 
 ## Light Nodes
 
