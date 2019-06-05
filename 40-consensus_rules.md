@@ -26,7 +26,8 @@ The name being registered can be any latin character, but MUST BE case-insensiti
 
 ## Checking for duplicates
 
-The nonce and the authorized address are NOT evaluated as part of the mapping when checking for duplicates.
+The nonce and the authorized address are NOT evaluated as part of the mapping
+when checking for duplicates.
 
 ## Renewing and Updating Registrations
 
@@ -43,9 +44,10 @@ or else your mapping will become free for general use.  This applies to all data
 
 #### Registering the update
 
-A new Numerifides transaction is created **with one of the inputs being the "authorized update address."**
-This transaction is only allowed to update the original record for the original record type.
-Any other scenario and the mapping will be considered UNTRUSTED.
+A new Numerifides transaction is created **with one of the inputs being the
+"authorized update address."** This transaction is only allowed to update the
+original record for the original record type. Any other scenario and the mapping
+will be considered UNTRUSTED.
 
 This transaction will also provide a new update address that is also authorized to
 register new updates to the record.
