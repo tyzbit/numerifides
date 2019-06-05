@@ -29,6 +29,7 @@ User creates the appropriate transaction that:
 * Pays back to themselves .001 BTC
 * Locks the Bitcoin for a duration of 52,160 blocks (1 year)
 * Has an appropriate Proof of Work advertised via the TXID hash
+* Can be updated with a key they control
 
 User broadcasts this transaction and it is included in a block.  User waits
 6 blocks, and then broadcasts to the Numerifides network the mapping she just
@@ -57,7 +58,7 @@ lets say it took 1 day of "mining" the transaction to produce that level of Proo
 Google themselves come along and wish to register the name, but see it is already
 registered. Google happens to have a lot of Bitcoin, and has a lot of processing power
 to "mine" a new transaction.  Google spends some time "mining" and finally transmits a
-transaction with a PoW level of 4, and Google locks up 10BTC, also for 1 year.
+transaction with a PoW level of 4(4 days of "mining"), and Google locks up 10BTC, also for 1 year.
 
 * T=52,560
 * P=4
@@ -67,7 +68,8 @@ transaction with a PoW level of 4, and Google locks up 10BTC, also for 1 year.
 `( 52,560 * 4 ) + ( 52,560 * 1,000,000,000 / 100,000,000 ) / 2 = 367,920`
 
 This handily beats the previous registration, which is still locked for the rest
-of the duration of the locktime.
+of the duration of the locktime, thereby strongly discouraging registering mappings
+one does not wish to use.
 
 # Third example ("namesquatted" by a user with a lot of BTC)
 
